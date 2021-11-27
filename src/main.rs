@@ -6,7 +6,7 @@ mod kio;
 mod array;
 
 #[allow(unused_imports)]
-use kio::{get_string, get_int, eq_all};
+use kio::{get_string, get_int, eq_any};
 use std::collections::hash_map::Keys;
 use std::io;
 use std::collections::HashMap;
@@ -21,8 +21,13 @@ fn register_commands(map: &mut HashMap<&str, fn()>) {
 
 #[allow(dead_code)]
 fn list_commands(keys: Keys<&str, fn()>) {
-    for key in keys {
-        print!("{} - ", key);
+    let size = keys.len();
+    for (i, key) in keys.enumerate() {
+        if i == size-1 { 
+            print!("{}", key);
+        } else { 
+            print!("{} - ", key);
+        }
     }
 
 }
@@ -43,13 +48,14 @@ fn main() {
 
 
         // fix eq_all function in kio.rs
-        if eq_all(entrim, &["exit", "quit"]) {
+        if eq_any(entrim, &["exit", "quit"]) {
             println!("Goodbye ^^");
             break
         }
 
-        if eq_all(entrim, &["help", "list", "commands"]) {
+        if eq_any(entrim, &["help", "list", "commands"]) {
             list_commands(map.keys());
+            break;
         }
                 
 

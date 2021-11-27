@@ -3,22 +3,16 @@ use std::io;
 // &[&str] equals to varargs
 // example usages: eq_any("some", &["is_some", "or_me_some?"])
 #[allow(dead_code)]
-pub fn eq_all(value: &str, args: &[&str]) -> bool {
+pub fn eq_any(value: &str, args: &[&str]) -> bool {
+    let mut retvalue = false;
 
-
-    // doesnt working, make a clean func like this 
-
-    let mut retvalue = true;
-    
-    println!("--------\n{}", value);
     for str in args {
-        println!("{}", *str);
-        if !value.eq_ignore_ascii_case(*str) {
-            retvalue=false;
+        if value.eq_ignore_ascii_case(*str) {
+            retvalue=true;
             break;
         }
     }
-    println!("--------");
+
     retvalue
 }
 
