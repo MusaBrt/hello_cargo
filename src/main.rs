@@ -4,12 +4,16 @@
 mod guess;
 mod kio;
 mod array;
+mod traitly;
 
 #[allow(unused_imports)]
-use kio::{get_string, get_int, eq_any};
+use kio::*;
+use kio::StringUtils as StringUtils; // for eq_any
 use std::collections::hash_map::Keys;
 use std::io;
+use std::env;
 use std::collections::HashMap;
+use std::io::Write;
 use guess::start_guess;
 use array::array_main;
 
@@ -20,44 +24,51 @@ fn register_commands(map: &mut HashMap<&str, fn()>) {
 }
 
 #[allow(dead_code)]
-fn list_commands(keys: Keys<&str, fn()>) {
-    let size = keys.len();
+fn print_info(keys: Keys<&str, fn()>, args: &Vec<String>) {
+    let last_index = keys.len()-1;
+    let mut output = String::new();
+    output.push_str("---- Commands ----\n");
     for (i, key) in keys.enumerate() {
-        if i == size-1 { 
-            print!("{}", key);
+        if i != last_index { 
+            output.push_str(&format!("{} - ", key));
         } else { 
-            print!("{} - ", key);
+            output.push_str(key);
         }
     }
-
+    output.push_str("\n---- Args ----\n");
+    print_values(args);
+    
+    println!("{}", output);
 }
 
 #[allow(dead_code)]
 fn main() {
+    let args: Vec<String> = env::args().collect();
+
     // thats mutable because changes the values of inside the map
     // rust's mutable logic is a bit different from of another languages's const thing
     let mut map: HashMap<&str, fn()> = HashMap::new();
     register_commands(&mut map);
     
-    println!("Welcome. You can choice a selection for your purpose. \nFor list type list.\nFor quit type quit or exit.");
+    println!("Welcome. You can choice a selection for your purpose. \nFor list type list.\nFor quit type quit or exit.\n----------------\n");
     let mut entry: String;
     loop {
-        entry = String::new(); // classic problem
+        print!("> ");
+        io::stdout().flush(); // for print >
+        entry = String::new(); // clear the buffer
+
         io::stdin().read_line(&mut entry).expect("An error occur while read the entry.");
         let entrim = entry.trim();
 
-
-        // fix eq_all function in kio.rs
-        if eq_any(entrim, &["exit", "quit"]) {
+        if entrim.eq_any(&["exit", "quit"]) {
             println!("Goodbye ^^");
             break
         }
-
-        if eq_any(entrim, &["help", "list", "commands"]) {
-            list_commands(map.keys());
-            break;
+        
+        if entrim.eq_any(&["help", "list", "commands"]) {
+            print_info(map.keys(), &args);
+            continue;
         }
-                
 
         if !map.contains_key(entrim) {
             println!("Command not found dude.");

@@ -1,19 +1,27 @@
 use std::io;
 
-// &[&str] equals to varargs
-// example usages: eq_any("some", &["is_some", "or_me_some?"])
-#[allow(dead_code)]
-pub fn eq_any(value: &str, args: &[&str]) -> bool {
-    let mut retvalue = false;
+// like interface thing
+pub trait StringUtils {
+    fn eq_any(&self, args: &[&str]) -> bool;
+}
 
-    for str in args {
-        if value.eq_ignore_ascii_case(*str) {
-            retvalue=true;
-            break;
+// interface implements -for- something
+// very cool thing :D
+impl StringUtils for &str {
+    // &[&str] equals to varargs
+    // example usages: String::from("zink").eq_any(&["is_some", "or_me_some?"])
+    fn eq_any(&self, args: &[&str]) -> bool {
+        let mut retvalue = false;
+
+        for str in args {
+            if self.eq_ignore_ascii_case(*str) {
+                retvalue=true;
+                break;
+            }
         }
-    }
 
-    retvalue
+        retvalue
+    }
 }
 
 #[allow(dead_code)]
@@ -44,48 +52,17 @@ pub fn get_int() -> i32 {
     }
 }
 
-use std::ops::{Bound, RangeBounds};
-
-trait StringUtils {
-    fn substring(&self, start: usize, len: usize) -> &str;
-    fn slice(&self, range: impl RangeBounds<usize>) -> &str;
+pub fn print_values(arr: &Vec<String>) {
+    let mut buf = String::new();
+    let last_index = arr.len()-1;
+    
+    for i in 0..=last_index {
+        if i != last_index {
+            buf.push_str(&format!("{} - ", arr[i]));
+        } else {
+            buf.push_str(&arr[i]);
+        }
+    }
+    println!("{}", buf);
 }
 
-impl StringUtils for str {
-    fn substring(&self, start: usize, len: usize) -> &str {
-        let mut char_pos = 0;
-        let mut byte_start = 0;
-        let mut it = self.chars();
-        loop {
-            if char_pos == start { break; }
-            if let Some(c) = it.next() {
-                char_pos += 1;
-                byte_start += c.len_utf8();
-            }
-            else { break; }
-        }
-        char_pos = 0;
-        let mut byte_end = byte_start;
-        loop {
-            if char_pos == len { break; }
-            if let Some(c) = it.next() {
-                char_pos += 1;
-                byte_end += c.len_utf8();
-            }
-            else { break; }
-        }
-        &self[byte_start..byte_end]
-    }
-    fn slice(&self, range: impl RangeBounds<usize>) -> &str {
-        let start = match range.start_bound() {
-            Bound::Included(bound) | Bound::Excluded(bound) => *bound,
-            Bound::Unbounded => 0,
-        };
-        let len = match range.end_bound() {
-            Bound::Included(bound) => *bound + 1,
-            Bound::Excluded(bound) => *bound,
-            Bound::Unbounded => self.len(),
-        } - start;
-        self.substring(start, len)
-    }
-}
